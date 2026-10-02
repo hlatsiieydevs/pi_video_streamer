@@ -1,0 +1,114 @@
+{
+  "cameras": [
+    {
+      "id": 0,
+      "name": "Camera 0 (CSI-0)",
+      "enabled": true,
+      "codec": "H.264",
+      "protocol": "RTSP",
+      "orientation": {
+        "hflip": true,
+        "vflip": true,
+        "rotation": 180,
+        "presets": ["Normal (0°)", "180° (Upside Down)", "H-Flip", "V-Flip"]
+      },
+      "crop": {
+        "enabled": false,
+        "preset": "1.0x (Full)",
+        "zoom": 1.0,
+        "x_offset": 0.0,
+        "y_offset": 0.0,
+        "presets": ["1.0x (Full)", "1.2x Zoom", "1.5x Zoom", "2.0x Zoom", "Center 50%", "Top-Half", "Bottom-Half"]
+      },
+      "fps": {
+        "enabled": true,
+        "value": 30,
+        "presets": [15, 24, 30, 60]
+      },
+      "resolution": {
+        "enabled": true,
+        "value": "1080p",
+        "width": 1920,
+        "height": 1080,
+        "presets": ["1080p", "720p", "480p", "360p"]
+      },
+      "quality": {
+        "enabled": true,
+        "value": "High",
+        "presets": ["Medium", "High", "Ultra"]
+      },
+      "bitrate": {
+        "enabled": true,
+        "value": "2048kbps",
+        "presets": ["1024kbps", "2048kbps", "4096kbps", "8192kbps"]
+      },
+      "aspect_ratio": {
+        "enabled": true,
+        "value": "16:9",
+        "presets": ["4:3", "16:9", "21:9"]
+      },
+      "hardware": {
+        "model": "Sony IMX708 Wide-Angle",
+        "sensor_size": "1/2.8\"",
+        "shutter_speed": "1/1000s",
+        "aperture": "f/1.8",
+        "iso": 100
+      }
+    },
+    {
+      "id": 1,
+      "name": "Camera 1 (CSI-1)",
+      "enabled": true,
+      "codec": "H.264",
+      "protocol": "RTSP",
+      "orientation": {
+        "hflip": false,
+        "vflip": false,
+        "rotation": 0,
+        "presets": ["Normal (0°)", "180° (Upside Down)", "H-Flip", "V-Flip"]
+      },
+      "crop": {
+        "enabled": false,
+        "preset": "1.0x (Full)",
+        "zoom": 1.0,
+        "x_offset": 0.0,
+        "y_offset": 0.0,
+        "presets": ["1.0x (Full)", "1.2x Zoom", "1.5x Zoom", "2.0x Zoom", "Center 50%", "Top-Half", "Bottom-Half"]
+      },
+      "fps": {
+        "enabled": true,
+        "value": 30,
+        "presets": [15, 24, 30, 60]
+      },
+      "resolution": {
+        "enabled": true,
+        "value": "1080p",
+        "width": 1920,
+        "height": 1080,
+        "presets": ["1080p", "720p", "480p", "360p"]
+      },
+      "quality": {
+        "enabled": true,
+        "value": "High",
+        "presets": ["Medium", "High", "Ultra"]
+      },
+      "bitrate": {
+        "enabled": true,
+        "value": "2048kbps",
+        "presets": ["1024kbps", "2048kbps", "4096kbps", "8192kbps"]
+      },
+      "aspect_ratio": {
+        "enabled": true,
+        "value": "16:9",
+        "presets": ["4:3", "16:9", "21:9"]
+      },
+      "hardware": {
+        "model": "Sony IMX708 Wide-Angle",
+        "sensor_size": "1/2.8\"",
+        "shutter_speed": "1/1000s",
+        "aperture": "f/1.8",
+        "iso": 100
+      }
+    }
+  ]
+}
