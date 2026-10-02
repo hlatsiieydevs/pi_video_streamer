@@ -165,6 +165,17 @@ curl -s http://10.0.0.5:5000/api/camera/0/status | jq .
 
 ## 🚀 Quick Start & Installation
 
+### 1. Initialization
+An initialization script is provided to automatically install system dependencies (Node.js, Python 3, FFmpeg), set up the Python virtual environment, install package dependencies, and verify the setup.
+
+```bash
+chmod +x init_script.sh
+./init_script.sh
+```
+
+### 2. Run the Application
+Once initialized, start the application:
+
 ```bash
 chmod +x start.sh
 ./start.sh
