@@ -148,8 +148,13 @@ class CameraDevice:
             try:
                 self.picam = Picamera2(self.camera_id)
                 config = self.picam.create_preview_configuration(
-                    main={"size": (1920, 1080), "format": "RGB888"}
+                    main={"size": (1920, 1080), "format": "YUV420"}
                 )
+                try:
+                    from picamera2 import Transform
+                    config.transform = Transform(hflip=True, vflip=True)
+                except Exception:
+                    pass
                 self.picam.configure(config)
                 self.picam.start()
                 self.is_simulated = False
@@ -163,14 +168,32 @@ class CameraDevice:
         self.is_simulated = True
         logger.info(f"Camera {self.camera_id} initialized in SIMULATION mode.")
 
+    def _stop_backend(self):
+        """Releases the camera hardware resources"""
+        if not self.is_simulated and self.picam:
+            try:
+                self.picam.stop()
+                self.picam.close()
+            except Exception as e:
+                logger.error(f"Picamera2 stop error: {e}")
+            finally:
+                self.picam = None
+        with self.raw_lock:
+            self.raw_frame = None
+        logger.info(f"Camera {self.camera_id} hardware released.")
+
     def _capture_worker(self):
         """Background thread grabbing raw frames and recording microsecond UNIX capture timestamps"""
         while self.is_running:
+            if not self.enabled:
+                time.sleep(1)
+                continue
+                
             capture_unix = time.time()
             if not self.is_simulated and self.picam:
                 try:
-                    frame_rgb = self.picam.capture_array()
-                    frame_bgr = cv2.cvtColor(frame_rgb, cv2.COLOR_RGB2BGR)
+                    frame_yuv = self.picam.capture_array()
+                    frame_bgr = cv2.cvtColor(frame_yuv, cv2.COLOR_YUV2BGR_I420)
                     with self.raw_lock:
                         self.raw_frame = frame_bgr
                         self.last_capture_unix = capture_unix
@@ -199,7 +222,13 @@ class CameraDevice:
         """Updates dynamic camera settings in memory"""
         with self.lock:
             if "enabled" in data:
-                self.enabled = bool(data["enabled"])
+                new_enabled = bool(data["enabled"])
+                if new_enabled != self.enabled:
+                    self.enabled = new_enabled
+                    if self.enabled:
+                        self._init_backend()
+                    else:
+                        self._stop_backend()
             
             if "codec" in data and data["codec"] in ["H.264", "H.265"]:
                 self.codec = str(data["codec"])
