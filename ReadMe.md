@@ -13,7 +13,7 @@
 
 * **IP Camera Emulation & RTSP Streaming**:
   * Dual-codec support: Selectable **H.264 (AVC)** and **H.265 (HEVC)** hardware/software compression.
-  * Dedicated RTSP endpoints for each camera (`rtsp://<pi-ip>:8554/live/cam0`).
+  * Dedicated RTSP endpoints dynamically generated for each connected camera (e.g., `rtsp://<pi-ip>:8554/live/cam<id>`).
   * Multiple streaming protocols: **RTSP**, **HLS**, **HTTP MJPEG**, **RTMP**, and **WebRTC**.
 * **Microsecond UNIX Timestamp Frame Synchronization**:
   * Every frame captured from CSI hardware is stamped with high-precision microsecond UNIX epoch time (`time.time()`).
@@ -25,6 +25,11 @@
 * **Open REST API Architecture**:
   * Unique API endpoints for each camera (`/api/camera/<cam_id>/status`, `/api/camera/<cam_id>/config`).
   * Full programmatic control over resolution, framerate, quality, bitrate, aspect ratio, orientation, and crop.
+* **Dynamic Hardware Auto-Detection**:
+  * Automatically detects physical cameras (up to 16+) using `libcamera` and dynamically creates independent streaming pipelines and API routes for each device.
+* **ONVIF Profile S Emulation (Auto-Discovery)**:
+  * Includes a built-in WS-Discovery UDP Multicast responder.
+  * Implements ONVIF Device and Media SOAP services, broadcasting the actual Pi MAC address to allow instant auto-discovery by standard NVRs and VMS systems (like `tk_analytics_edge`).
 * **Mobile-Optimized Responsive Web Interface**:
   1. **Live Camera Preview & Real-Time Metrics**:
      - Real-time preview stream with live metadata overlay (Bitrate, FPS, Codec, Resolution, Orientation, Crop, UNIX Timestamp).
@@ -41,10 +46,9 @@ This section details how external applications (Python, OpenCV, PyAV, Node.js, C
 
 | Stream Type | Endpoint URL | Protocol / Format | Notes |
 | :--- | :--- | :--- | :--- |
-| **Camera 0 RTSP** | `rtsp://<pi-ip>:8554/live/cam0` | RTSP / RTP (H.264 / MJPEG) | Port 8554, 90 kHz UNIX RTP Timestamp in Header |
-| **Camera 1 RTSP** | `rtsp://<pi-ip>:8554/live/cam1` | RTSP / RTP (H.264 / MJPEG) | Port 8554, 90 kHz UNIX RTP Timestamp in Header |
-| **Camera 0 HTTP Preview** | `http://<pi-ip>:5000/video_feed/0` | HTTP Multipart MJPEG | Includes `X-Timestamp: 1787573000.123456` Header |
-| **Camera 1 HTTP Preview** | `http://<pi-ip>:5000/video_feed/1` | HTTP Multipart MJPEG | Includes `X-Timestamp: 1787573000.123456` Header |
+| **Camera <id> RTSP** | `rtsp://<pi-ip>:8554/live/cam<id>` | RTSP / RTP (H.264 / MJPEG) | Port 8554, 90 kHz UNIX RTP Timestamp in Header |
+| **Camera <id> HTTP Preview** | `http://<pi-ip>:5000/video_feed/<id>` | HTTP Multipart MJPEG | Includes `X-Timestamp: 1787573000.123456` Header |
+
 
 ---
 

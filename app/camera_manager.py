@@ -470,46 +470,39 @@ class CameraManager:
         self.load_cameras()
 
     def detect_cameras(self):
-        """Dynamically probes for connected cameras via Picamera2 or V4L2"""
+        """Dynamically probes for connected cameras via libcamera"""
         cameras_found = []
-        if HAS_PICAMERA2:
-            try:
-                from picamera2 import Picamera2
-                picam_list = Picamera2.cameras()
-                for idx, dev in enumerate(picam_list):
-                    model = dev.get("Model", f"CSI Camera {idx}")
+        import subprocess
+        try:
+            # Safely list cameras without acquiring them in Python
+            output = subprocess.check_output(
+                ["rpicam-hello", "--list-cameras"], 
+                text=True, 
+                stderr=subprocess.STDOUT, 
+                timeout=5
+            )
+            for line in output.split('\n'):
+                # Format is usually "0 : imx708 [4608x2592] (/base/...)"
+                if line.strip().startswith(str(len(cameras_found)) + " :") or line.strip().startswith(str(len(cameras_found)) + ":"):
+                    idx = len(cameras_found)
+                    name_str = line.split(":", 1)[1].strip()
+                    model_short = name_str.split(" ")[0]
                     cameras_found.append({
                         "id": idx,
-                        "name": f"Camera {idx} ({model})",
+                        "name": f"Camera {idx} ({model_short})",
                         "codec": "H.264",
-                        "hardware": {"model": model, "is_simulated": False}
+                        "hardware": {"model": name_str, "is_simulated": False}
                     })
-            except Exception:
-                pass
-                
-        if not cameras_found:
-            import glob
-            video_devs = glob.glob("/dev/video*")
-            for dev_path in sorted(video_devs):
-                dev_num = dev_path.replace("/dev/video", "")
-                if dev_num.isdigit() and int(dev_num) % 2 == 0:
-                    idx = int(dev_num) // 2
-                    cameras_found.append({
-                        "id": idx,
-                        "name": f"Camera {idx} ({dev_path})",
-                        "codec": "H.264",
-                        "hardware": {"model": f"V4L2 Device {dev_path}", "is_simulated": False}
-                    })
+        except Exception as e:
+            logger.warning(f"Failed to list cameras via rpicam-hello: {e}")
+            
         return cameras_found
 
     def load_cameras(self):
         """Loads cameras by dynamically detecting hardware"""
         detected = self.detect_cameras()
         if not detected:
-            logger.warning("No hardware cameras detected. Registering one simulated camera.")
-            detected = [
-                {"id": 0, "name": "Simulated Camera 0", "codec": "H.264", "hardware": {"is_simulated": True}}
-            ]
+            logger.warning("No hardware cameras detected. System will wait for hardware to be connected.")
             
         saved_config = {}
         if os.path.exists(self.config_path):

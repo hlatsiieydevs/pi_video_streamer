@@ -4,6 +4,21 @@ All notable changes to the **Basic Video Streamer** IP camera emulation service 
 
 ---
 
+## [1.6.0] - 2026-10-02
+
+### Added
+- **ONVIF Profile S Emulation (`app/onvif_server.py`)**:
+  - Implemented a lightweight ONVIF Profile S wrapper serving Device and Media SOAP endpoints.
+  - Implemented WS-Discovery background UDP Multicast service on port 3702 for NVR/VMS network auto-discovery (e.g., `tk_analytics_edge`).
+  - Dynamically extracts actual Raspberry Pi MAC address (`uuid.getnode()`) for `HardwareId`, `SerialNumber`, and WS-Discovery scopes.
+- **Dynamic Hardware Auto-Detection (`app/camera_manager.py`)**:
+  - Reworked `detect_cameras` to use `rpicam-hello` natively.
+  - Automatically identifies arbitrary quantities of connected sensors and dynamically sets up RTSP pipelines, endpoints, and API routes without locking devices erroneously.
+  - Fully abandoned the static `cam0` and `cam1` rigid assignments.
+- **Initialization & Ignore Rules**:
+  - Built an automated `init_script.sh` for resolving Python and Node.js environment dependencies cleanly.
+  - Provided a standard `.gitignore` template.
+
 ## [1.5.0] - 2026-08-24
 
 ### Added
