@@ -89,6 +89,13 @@ def api_camera_rtsp_url(cam_id):
         "protocol": cam.protocol
     })
 
+# Initialize the ONVIF Server Wrapper
+try:
+    from onvif_server import init_onvif
+    init_onvif(app)
+except Exception as e:
+    print(f"Failed to initialize ONVIF wrapper: {e}")
+
 if __name__ == '__main__':
     # Start RTSP service
     rtsp_manager.start_server()

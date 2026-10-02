@@ -469,26 +469,63 @@ class CameraManager:
         self.cameras = {}
         self.load_cameras()
 
+    def detect_cameras(self):
+        """Dynamically probes for connected cameras via Picamera2 or V4L2"""
+        cameras_found = []
+        if HAS_PICAMERA2:
+            try:
+                from picamera2 import Picamera2
+                picam_list = Picamera2.cameras()
+                for idx, dev in enumerate(picam_list):
+                    model = dev.get("Model", f"CSI Camera {idx}")
+                    cameras_found.append({
+                        "id": idx,
+                        "name": f"Camera {idx} ({model})",
+                        "codec": "H.264",
+                        "hardware": {"model": model, "is_simulated": False}
+                    })
+            except Exception:
+                pass
+                
+        if not cameras_found:
+            import glob
+            video_devs = glob.glob("/dev/video*")
+            for dev_path in sorted(video_devs):
+                dev_num = dev_path.replace("/dev/video", "")
+                if dev_num.isdigit() and int(dev_num) % 2 == 0:
+                    idx = int(dev_num) // 2
+                    cameras_found.append({
+                        "id": idx,
+                        "name": f"Camera {idx} ({dev_path})",
+                        "codec": "H.264",
+                        "hardware": {"model": f"V4L2 Device {dev_path}", "is_simulated": False}
+                    })
+        return cameras_found
+
     def load_cameras(self):
-        """Loads camera configurations from JSON file or default fallback"""
-        config_data = []
+        """Loads cameras by dynamically detecting hardware"""
+        detected = self.detect_cameras()
+        if not detected:
+            logger.warning("No hardware cameras detected. Registering one simulated camera.")
+            detected = [
+                {"id": 0, "name": "Simulated Camera 0", "codec": "H.264", "hardware": {"is_simulated": True}}
+            ]
+            
+        saved_config = {}
         if os.path.exists(self.config_path):
             try:
                 with open(self.config_path, 'r') as f:
                     data = json.load(f)
-                    config_data = data.get("cameras", [])
+                    for c in data.get("cameras", []):
+                        saved_config[c["id"]] = c
             except Exception as e:
                 logger.error(f"Error reading {self.config_path}: {e}")
 
-        if not config_data:
-            config_data = [
-                {"id": 0, "name": "Camera 0 (CSI-0)", "codec": "H.264"},
-                {"id": 1, "name": "Camera 1 (CSI-1)", "codec": "H.264"}
-            ]
-
-        for cam_cfg in config_data:
+        for cam_cfg in detected:
             cam_id = cam_cfg["id"]
-            self.cameras[cam_id] = CameraDevice(cam_cfg)
+            final_cfg = saved_config.get(cam_id, {}).copy()
+            final_cfg.update(cam_cfg) # Overwrite hardware basics
+            self.cameras[cam_id] = CameraDevice(final_cfg)
 
     def get_camera(self, cam_id):
         """Returns CameraDevice instance by ID"""

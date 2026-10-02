@@ -92,9 +92,12 @@ class RTSPClientHandler(threading.Thread):
                 cseq = line.split(":", 1)[1].strip()
 
         # Parse Camera ID from URL (e.g., rtsp://10.0.0.5:8554/live/cam0 -> cam_id=0)
-        if "cam1" in url:
-            self.cam_id = 1
-        elif "cam0" in url:
+        if "/live/cam" in url:
+            try:
+                self.cam_id = int(url.split("/live/cam")[1].split("/")[0].split("?")[0])
+            except ValueError:
+                self.cam_id = 0
+        else:
             self.cam_id = 0
 
         logger.info(f"RTSP Request: {method} {url} (CSeq: {cseq})")
