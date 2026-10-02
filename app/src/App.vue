@@ -238,6 +238,28 @@
         <!-- RIGHT COLUMN: Interactive Camera Controls (5 cols) -->
         <div class="lg:col-span-5 space-y-6">
           
+          <!-- Camera Power / Enable Card -->
+          <div class="glass-panel rounded-2xl p-5 border border-slate-800 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2">
+                <Power class="w-5 h-5" :class="activeCam.enabled ? 'text-emerald-400' : 'text-red-400'" />
+                <h3 class="text-base font-semibold text-white font-heading">Camera Power</h3>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  :checked="activeCam.enabled" 
+                  @change="updateConfig({ enabled: !activeCam.enabled })"
+                  class="sr-only peer"
+                >
+                <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+              </label>
+            </div>
+            <div class="text-xs text-slate-400">
+              Toggle this switch to completely disable or enable this camera stream on the network.
+            </div>
+          </div>
+
           <!-- Orientation & Flip Controls Card -->
           <div class="glass-panel rounded-2xl p-5 border border-slate-800 space-y-4">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -403,7 +425,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { 
   Camera, RefreshCw, Video, Globe, Film, Activity, Zap, Layers, 
   Cpu, Sliders, ShieldCheck, Settings, Copy, RotateCw, 
-  FlipHorizontal, FlipVertical, Crop, Clock 
+  FlipHorizontal, FlipVertical, Crop, Clock, Power
 } from 'lucide-vue-next'
 
 // Initial state optimized for RPi 5

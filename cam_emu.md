@@ -6,7 +6,7 @@ This document outlines the key features implemented by the **Basic Video Streame
 
 ### 1. RTSP Streaming (Real-Time Streaming Protocol)
 Standard commercial security cameras stream compressed video over RTSP.
-- **RTSP Endpoints:** The Pi exposes standard RTSP streams at `rtsp://<pi-ip>:8554/live/cam0`.
+- **RTSP Endpoints:** The Pi exposes standard RTSP streams at `rtsp://<pi-ip>:8554/stream1`.
 - **Hardware Encoding:** Video is compressed using H.264 (AVC) or H.265 (HEVC) encoding, which is essential for low latency, high-quality IP camera emulation.
 - **Multi-Protocol Support:** In addition to RTSP, the system provides HTTP MJPEG (`http://<pi-ip>:5000/video_feed/0`), HLS, RTMP, and WebRTC to support various NVRs and web clients.
 

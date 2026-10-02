@@ -13,7 +13,7 @@
 
 * **IP Camera Emulation & RTSP Streaming**:
   * Dual-codec support: Selectable **H.264 (AVC)** and **H.265 (HEVC)** hardware/software compression.
-  * Dedicated RTSP endpoints dynamically generated for each connected camera (e.g., `rtsp://<pi-ip>:8554/live/cam<id>`).
+  * Dedicated RTSP endpoints dynamically generated for each connected camera (e.g., `rtsp://<pi-ip>:8554/stream<id+1>`).
   * Multiple streaming protocols: **RTSP**, **HLS**, **HTTP MJPEG**, **RTMP**, and **WebRTC**.
 * **Microsecond UNIX Timestamp Frame Synchronization**:
   * Every frame captured from CSI hardware is stamped with high-precision microsecond UNIX epoch time (`time.time()`).
@@ -46,7 +46,7 @@ This section details how external applications (Python, OpenCV, PyAV, Node.js, C
 
 | Stream Type | Endpoint URL | Protocol / Format | Notes |
 | :--- | :--- | :--- | :--- |
-| **Camera <id> RTSP** | `rtsp://<pi-ip>:8554/live/cam<id>` | RTSP / RTP (H.264 / MJPEG) | Port 8554, 90 kHz UNIX RTP Timestamp in Header |
+| **Camera <id> RTSP** | `rtsp://<pi-ip>:8554/stream<id+1>` | RTSP / RTP (H.264 / MJPEG) | Port 8554, 90 kHz UNIX RTP Timestamp in Header |
 | **Camera <id> HTTP Preview** | `http://<pi-ip>:5000/video_feed/<id>` | HTTP Multipart MJPEG | Includes `X-Timestamp: 1787573000.123456` Header |
 
 
@@ -60,7 +60,7 @@ This section details how external applications (Python, OpenCV, PyAV, Node.js, C
 import av
 
 # Connect to RTSP Stream for Camera 0
-rtsp_url = "rtsp://10.0.0.5:8554/live/cam0"
+rtsp_url = "rtsp://10.0.0.5:8554/stream1"
 container = av.open(rtsp_url)
 
 for packet in container.demux(video=0):
@@ -79,7 +79,7 @@ for packet in container.demux(video=0):
 ```python
 import cv2
 
-rtsp_url = "rtsp://10.0.0.5:8554/live/cam0"
+rtsp_url = "rtsp://10.0.0.5:8554/stream1"
 cap = cv2.VideoCapture(rtsp_url)
 
 while cap.isOpened():
@@ -130,7 +130,7 @@ curl -s http://10.0.0.5:5000/api/camera/0/status | jq .
   "enabled": true,
   "codec": "H.264",
   "protocol": "RTSP",
-  "rtsp_url": "rtsp://10.0.0.5:8554/live/cam0",
+  "rtsp_url": "rtsp://10.0.0.5:8554/stream1",
   "sync_telemetry": {
     "timestamp": 1787573000.123456,
     "timestamp_iso": "2026-08-24T14:46:00.123456Z",
@@ -153,16 +153,16 @@ curl -s http://10.0.0.5:5000/api/camera/0/status | jq .
 
 * **VLC Media Player**:
   ```bash
-  vlc rtsp://10.0.0.5:8554/live/cam0
-  vlc rtsp://10.0.0.5:8554/live/cam1
+  vlc rtsp://10.0.0.5:8554/stream1
+  vlc rtsp://10.0.0.5:8554/stream2
   ```
 * **FFmpeg Stream Ingestion**:
   ```bash
-  ffmpeg -i rtsp://10.0.0.5:8554/live/cam0 -c copy output_cam0.mp4
+  ffmpeg -i rtsp://10.0.0.5:8554/stream1 -c copy output_cam0.mp4
   ```
 * **GStreamer Pipeline**:
   ```bash
-  gst-launch-1.0 rtspsrc location=rtsp://10.0.0.5:8554/live/cam0 ! rtph264depay ! avdec_h264 ! autovideosink
+  gst-launch-1.0 rtspsrc location=rtsp://10.0.0.5:8554/stream1 ! rtph264depay ! avdec_h264 ! autovideosink
   ```
 
 ---

@@ -198,6 +198,9 @@ class CameraDevice:
     def set_config(self, data):
         """Updates dynamic camera settings in memory"""
         with self.lock:
+            if "enabled" in data:
+                self.enabled = bool(data["enabled"])
+            
             if "codec" in data and data["codec"] in ["H.264", "H.265"]:
                 self.codec = str(data["codec"])
                 
@@ -535,6 +538,10 @@ class CameraManager:
             return
 
         while True:
+            if not cam.enabled:
+                time.sleep(1)
+                continue
+
             res = cam.get_frame_bytes()
             if isinstance(res, tuple):
                 frame_bytes, capture_unix = res

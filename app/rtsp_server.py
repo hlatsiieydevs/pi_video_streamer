@@ -91,10 +91,11 @@ class RTSPClientHandler(threading.Thread):
             if line.lower().startswith("cseq:"):
                 cseq = line.split(":", 1)[1].strip()
 
-        # Parse Camera ID from URL (e.g., rtsp://10.0.0.5:8554/live/cam0 -> cam_id=0)
-        if "/live/cam" in url:
+        # Parse Camera ID from URL (e.g., rtsp://10.0.0.5:8554/stream1 -> cam_id=0)
+        if "/stream" in url:
             try:
-                self.cam_id = int(url.split("/live/cam")[1].split("/")[0].split("?")[0])
+                stream_num = int(url.split("/stream")[1].split("/")[0].split("?")[0])
+                self.cam_id = max(0, stream_num - 1)
             except ValueError:
                 self.cam_id = 0
         else:
@@ -217,7 +218,7 @@ class RTSPClientHandler(threading.Thread):
         try:
             from camera_manager import camera_manager
             cam = camera_manager.get_camera(self.cam_id)
-            if not cam:
+            if not cam or not cam.enabled:
                 return
 
             res = cam.get_frame_bytes()
@@ -335,7 +336,7 @@ class RTSPServerManager:
     def register_camera_stream(self, cam_id, codec="H.264", width=1920, height=1080, fps=30, bitrate="2048kbps"):
         """Registers or updates camera RTSP stream profile"""
         with self.lock:
-            url = f"rtsp://{self.host_ip}:{self.port}/live/cam{cam_id}"
+            url = f"rtsp://{self.host_ip}:{self.port}/stream{cam_id + 1}"
             self.active_streams[cam_id] = {
                 "cam_id": cam_id,
                 "url": url,
@@ -356,7 +357,7 @@ class RTSPServerManager:
             stream = self.active_streams.get(cam_id)
             if stream:
                 return stream["url"]
-            return f"rtsp://{self.host_ip}:{self.port}/live/cam{cam_id}"
+            return f"rtsp://{self.host_ip}:{self.port}/stream{cam_id + 1}"
 
     def stop_server(self):
         """Stops RTSP server service"""
